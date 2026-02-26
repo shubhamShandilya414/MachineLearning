@@ -26,6 +26,7 @@ public List<Order> fetchOrders() {
             .sorted(Comparator.comparing(Order::getPrice))
             .collect(Collectors.toList()); 
     
+    
 }
     public static void main(String[] args) {
         SpringApplication.run(OrderServiceApplication.class, args);
