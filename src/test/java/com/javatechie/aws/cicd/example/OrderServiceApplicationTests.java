@@ -1,19 +1,28 @@
-package com/javatechie/aws/cicd/example;
+package com.javatechie.aws.cicd.example;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
 
-@SpringBootTest
-public class OrderServiceApplicationTests {
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderServiceApplicationTests {
 
     @Autowired
-    private OrderServiceApplication orderServiceApplication;
+    private TestRestTemplate testRestTemplate;
 
     @Test
     void testFetchOrders() {
-        List<Order> orders = orderServiceApplication.fetchOrders();
-        assertTrue(orders.stream().allMatch(order -> order.getId() > 100)); // NEW
+        ResponseEntity<List<Order>> response = testRestTemplate.getForEntity("/orders", List.class);
+        assertNotNull(response.getBody());
+        // NEW
+        response.getBody().forEach(order -> {
+            assert order.getId() > 100;
+        });
     }
 }
