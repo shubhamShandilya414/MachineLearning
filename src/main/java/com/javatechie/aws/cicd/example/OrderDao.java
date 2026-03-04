@@ -1,4 +1,3 @@
-
 package com.javatechie.aws/cicd/example;
 
 import org.springframework.stereotype.Repository;
@@ -16,7 +15,7 @@ public class OrderDao {
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .filter(order -> order.getId() > 100) // NEW: filtering logic
+                .filter(order -> order.getId() > 100) // NEW
                 .collect(Collectors.toList());
     }
 }
