@@ -19,11 +19,16 @@ public class OrderServiceApplication {
     @Autowired
     private OrderDao orderDao;
 
-    @GetMapping
-    public List<Order> fetchOrders() {
-        return orderDao.getOrders().stream().
-                sorted(Comparator.comparing(Order::getPrice)).collect(Collectors.toList());
-    }
+         @GetMapping
+public List<Order> fetchOrders() {
+    return orderDao.getOrders().stream()
+            .filter(order -> order.getPrice() > 100)
+            .sorted(Comparator.comparing(Order::getPrice))
+            .collect(Collectors.toList()); 
+    
+
+    
+}
 
     public static void main(String[] args) {
         SpringApplication.run(OrderServiceApplication.class, args);
