@@ -28,7 +28,7 @@ public class OrderService {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getId() == id)
                 .findFirst()
-                .orElse(null); // NEW
+                .orElse(null);
     }
 
     // NEW
