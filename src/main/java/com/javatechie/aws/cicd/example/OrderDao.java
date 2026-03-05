@@ -34,9 +34,9 @@ public class OrderDao {
     }
 
     // NEW method to paginate orders
-    public List<Order> getOrdersPaginated(int pageNumber, int pageSize) {
+    public List<Order> getOrdersPaginated(int pageSize, int pageNumber) {
         return getOrders().stream()
-                .skip((pageNumber - 1) * pageSize)
+                .skip((long) (pageNumber - 1) * pageSize)
                 .limit(pageSize)
                 .collect(Collectors.toList());
     }
