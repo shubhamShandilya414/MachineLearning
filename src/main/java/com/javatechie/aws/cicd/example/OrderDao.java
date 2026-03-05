@@ -18,39 +18,26 @@ public class OrderDao {
                 .collect(Collectors.toList());
     }
 
-    // NEW
+    // NEW method to retrieve order by ID
     public Order getOrderById(int id) {
-        return Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
+        return getOrders().stream()
                 .filter(order -> order.getId() == id)
                 .findFirst()
-                .orElse(null); // NEW
+                .orElse(null); // NEW return null if order not found
     }
 
-    // NEW
-    public List<Order> getOrdersWithFiltering(int minPrice) {
-        return Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
+    // NEW method to filter orders by minimum price
+    public List<Order> getOrdersByMinPrice(int minPrice) {
+        return getOrders().stream()
                 .filter(order -> order.getPrice() >= minPrice)
-                .collect(Collectors.toList()); // NEW
+                .collect(Collectors.toList());
     }
 
-    // NEW
-    public List<Order> getOrdersWithPagination(int pageSize, int pageNumber) {
-        List<Order> orders = Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
+    // NEW method to paginate orders
+    public List<Order> getOrdersPaginated(int pageSize, int pageNumber) {
+        return getOrders().stream()
+                .skip((long) (pageNumber - 1) * pageSize)
+                .limit(pageSize)
                 .collect(Collectors.toList());
-        int start = (pageNumber - 1) * pageSize;
-        int end = Math.min(start + pageSize, orders.size());
-        return orders.subList(start, end); // NEW
     }
 }
