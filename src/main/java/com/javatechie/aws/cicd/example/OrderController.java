@@ -1,0 +1,46 @@
+package com.javatechie.aws.cicd.example;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    private final OrderDao orderDao;
+
+    @Autowired
+    public OrderController(OrderDao orderDao) {
+        this.orderDao = orderDao;
+    }
+
+    @GetMapping
+    public List<Order> getOrders(@RequestParam(required = false) Integer minPrice, @RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size) {
+        List<Order> orders = orderDao.getOrders();
+        // NEW: filter by min price
+        if (minPrice != null) {
+            orders = orders.stream().filter(order -> order.getPrice() >= minPrice).collect(Collectors.toList());
+        }
+        // NEW: pagination
+        int start = page * size;
+        int end = Math.min(start + size, orders.size());
+        orders = orders.subList(start, end);
+        return orders;
+    }
+
+    // NEW: endpoint to retrieve order by ID
+    @GetMapping("/{id}")
+    public Order getOrderById(@PathVariable int id) {
+        return orderDao.getOrders().stream()
+                .filter(order -> order.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+}
