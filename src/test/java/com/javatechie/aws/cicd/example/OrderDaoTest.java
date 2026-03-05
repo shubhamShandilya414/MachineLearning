@@ -1,7 +1,5 @@
 package com.javatechie.aws.cicd.example;
 
-import com.javatechie.aws.cicd.example.Order;
-import com.javatechie.aws.cicd.example.OrderDao;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,74 +20,86 @@ public class OrderDaoTest {
     private OrderDao orderDao;
 
     @InjectMocks
-    private OrderDao orderDaoInject;
+    private OrderService orderService;
 
     @Test
     void should_returnAllOrders_when_noFilterProvided() {
         // Arrange
-        List<Order> expectedOrders = Stream.of(
+        when(orderDao.getOrders()).thenReturn(Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .collect(Collectors.toList());
-
-        when(orderDao.getOrders()).thenReturn(expectedOrders);
+                .collect(Collectors.toList()));
 
         // Act
-        List<Order> actualOrders = orderDao.getOrders();
+        List<Order> orders = orderService.getOrders(null, null, null);
 
         // Assert
-        assertNotNull(actualOrders);
-        assertEquals(4, actualOrders.size());
-        assertEquals(expectedOrders, actualOrders);
+        assertEquals(4, orders.size());
+        assertEquals(101, orders.get(0).getId());
+        assertEquals(58, orders.get(1).getId());
+        assertEquals(205, orders.get(2).getId());
+        assertEquals(809, orders.get(3).getId());
     }
 
     @Test
     void should_returnFilteredOrders_when_minPriceProvided() {
         // Arrange
-        List<Order> expectedOrders = Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(205, "Laptop", 1, 150000))
-                .collect(Collectors.toList());
-
         when(orderDao.getOrders()).thenReturn(Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .filter(order -> order.getPrice() > 10000)
                 .collect(Collectors.toList()));
 
         // Act
-        List<Order> actualOrders = orderDao.getOrders();
+        List<Order> orders = orderService.getOrders(10000, null, null);
 
         // Assert
-        assertNotNull(actualOrders);
-        assertEquals(2, actualOrders.size());
-        assertEquals(expectedOrders, actualOrders);
+        assertEquals(3, orders.size());
+        assertEquals(101, orders.get(0).getId());
+        assertEquals(205, orders.get(1).getId());
+        assertEquals(809, orders.get(2).getId());
+    }
+
+    @Test
+    void should_returnPaginatedOrders_when_pageSizeProvided() {
+        // Arrange
+        when(orderDao.getOrders()).thenReturn(Stream.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799))
+                .collect(Collectors.toList()));
+
+        // Act
+        List<Order> orders = orderService.getOrders(null, 2, null);
+
+        // Assert
+        assertEquals(2, orders.size());
+        assertEquals(101, orders.get(0).getId());
+        assertEquals(58, orders.get(1).getId());
     }
 
     @Test
     void should_returnOrderById_when_idProvided() {
         // Arrange
-        Order expectedOrder = new Order(101, "Mobile", 1, 30000);
-
         when(orderDao.getOrders()).thenReturn(Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .filter(order -> order.getId() == 101)
                 .collect(Collectors.toList()));
 
         // Act
-        List<Order> actualOrders = orderDao.getOrders();
+        Order order = orderService.getOrderById(101);
 
         // Assert
-        assertNotNull(actualOrders);
-        assertEquals(1, actualOrders.size());
-        assertEquals(expectedOrder, actualOrders.get(0));
+        assertEquals(101, order.getId());
+        assertEquals("Mobile", order.getName());
+        assertEquals(1, order.getQuantity());
+        assertEquals(30000, order.getPrice());
     }
 
     @Test
@@ -101,39 +110,29 @@ public class OrderDaoTest {
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .filter(order -> order.getPrice() > 200000)
                 .collect(Collectors.toList()));
 
         // Act
-        List<Order> actualOrders = orderDao.getOrders();
+        List<Order> orders = orderService.getOrders(1000000, null, null);
 
         // Assert
-        assertNotNull(actualOrders);
-        assertEquals(0, actualOrders.size());
+        assertEquals(0, orders.size());
     }
 
     @Test
-    void should_returnPaginatedOrders_when_pageSizeProvided() {
+    void should_returnNull_when_orderIdNotFound() {
         // Arrange
-        List<Order> expectedOrders = Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000))
-                .collect(Collectors.toList());
-
         when(orderDao.getOrders()).thenReturn(Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
-                .limit(2)
                 .collect(Collectors.toList()));
 
         // Act
-        List<Order> actualOrders = orderDao.getOrders();
+        Order order = orderService.getOrderById(1000);
 
         // Assert
-        assertNotNull(actualOrders);
-        assertEquals(2, actualOrders.size());
-        assertEquals(expectedOrders, actualOrders);
+        assertEquals(null, order);
     }
 }
