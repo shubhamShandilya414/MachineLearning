@@ -1,15 +1,19 @@
 package com.javatechie.aws.cicd.example;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SpringBootApplication
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -31,7 +35,10 @@ public class OrderController {
         // NEW: pagination
         int start = page * size;
         int end = Math.min(start + size, orders.size());
-        return orders.subList(start, end);
+        orders = orders.subList(start, end);
+        // sort by price
+        orders = orders.stream().sorted(Comparator.comparingLong(Order::getPrice)).collect(Collectors.toList());
+        return orders;
     }
 
     // NEW: endpoint to retrieve order by ID
