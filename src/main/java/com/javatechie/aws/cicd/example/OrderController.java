@@ -31,16 +31,12 @@ public class OrderController {
         // NEW: pagination
         int start = page * size;
         int end = Math.min(start + size, orders.size());
-        orders = orders.subList(start, end);
-        return orders;
+        return orders.subList(start, end);
     }
 
     // NEW: endpoint to retrieve order by ID
     @GetMapping("/{id}")
     public Order getOrderById(@PathVariable int id) {
-        return orderDao.getOrders().stream()
-                .filter(order -> order.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return orderDao.getOrders().stream().filter(order -> order.getId() == id).findFirst().orElse(null);
     }
 }
