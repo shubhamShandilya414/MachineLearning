@@ -1,38 +1,50 @@
 package com.javatechie.aws.cicd.example;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-@SpringBootApplication
 @RestController
 @RequestMapping("/orders")
+@Slf4j
 public class OrderController {
 
+    private final OrderDao orderDao;
+
     @Autowired
-    private OrderDao orderDao;
+    public OrderController(OrderDao orderDao) {
+        this.orderDao = orderDao;
+    }
 
     @GetMapping
-    public List<Order> getOrders() {
-        return orderDao.getOrders().stream()
-                .sorted(Comparator.comparingLong(Order::getPrice))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<Order>> getOrders() {
+        log.info("getOrders called");
+        List<Order> orders = orderDao.getOrders();
+        return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/{id}")
-    // NEW: endpoint for retrieving order by ID
-    public Order getOrderById(@PathVariable int id) {
-        return orderDao.getOrders().stream()
-                .filter(order -> order.getId() == id)
-                .findFirst()
-                .orElse(null);
+    public ResponseEntity<Order> getOrderById(@PathVariable int id) {
+        log.info("getOrderById called with id={}", id);
+        try {
+            Optional<Order> order = orderDao.getOrders().stream()
+                    .filter(o -> o.getId() == id)
+                    .findFirst();
+            return order.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            log.error("Failed to retrieve order id={}", id, e);
+            return ResponseEntity.badRequest().build();
+        }
     }
+
+    // NEW: endpoint for retrieving order by ID
+    // NEW: added error handling and logging
 }
