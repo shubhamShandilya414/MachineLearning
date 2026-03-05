@@ -9,13 +9,35 @@ import java.util.stream.Stream;
 @Repository
 public class OrderDao {
 
-
     public List<Order> getOrders() {
         return Stream.of(
-                new Order(101, "Mobile", 1, 300000),
+                new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
+                .collect(Collectors.toList());
+    }
+
+    // NEW method to retrieve order by ID
+    public Order getOrderById(int id) {
+        return getOrders().stream()
+                .filter(order -> order.getId() == id)
+                .findFirst()
+                .orElse(null); // NEW return null if order not found
+    }
+
+    // NEW method to filter orders by minimum price
+    public List<Order> getOrdersByMinPrice(int minPrice) {
+        return getOrders().stream()
+                .filter(order -> order.getPrice() >= minPrice)
+                .collect(Collectors.toList());
+    }
+
+    // NEW method to paginate orders
+    public List<Order> getOrdersPaginated(int pageNumber, int pageSize) {
+        return getOrders().stream()
+                .skip((pageNumber - 1) * pageSize)
+                .limit(pageSize)
                 .collect(Collectors.toList());
     }
 }
