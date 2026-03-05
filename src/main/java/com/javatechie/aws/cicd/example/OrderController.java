@@ -26,7 +26,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getOrders(@RequestParam(required = false) Integer minPrice, @RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size) {
+    public List<Order> getOrders(@RequestParam(required = false) Long minPrice, @RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size) {
         List<Order> orders = orderDao.getOrders();
         // NEW: filter by min price
         if (minPrice != null) {
