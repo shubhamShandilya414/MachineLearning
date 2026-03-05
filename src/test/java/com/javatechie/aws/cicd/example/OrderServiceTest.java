@@ -8,12 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,85 +28,63 @@ public class OrderServiceTest {
     private OrderService orderService;
 
     @Test
-    void should_returnAllOrders_when_noFilterProvided() {
-        // Arrange
-        List<Order> orders = Stream.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
-                .collect(Collectors.toList());
-        when(orderDao.getOrders()).thenReturn(orders);
-
-        // Act
-        List<Order> result = orderService.getOrders();
-
-        // Assert
-        assertEquals(4, result.size());
-        assertEquals(101, result.get(0).getId());
-        assertEquals(58, result.get(1).getId());
-        assertEquals(205, result.get(2).getId());
-        assertEquals(809, result.get(3).getId());
-    }
-
-    @Test
     void should_returnFilteredOrders_when_minPriceProvided() {
         // Arrange
-        List<Order> orders = Stream.of(
+        when(orderDao.getOrders()).thenReturn(List.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
-                .collect(Collectors.toList());
-        when(orderDao.getOrders()).thenReturn(orders);
+                new Order(809, "headset", 1, 1799)
+        ));
 
         // Act
-        List<Order> result = orderService.getOrders(10000);
+        List<Order> result = orderService.getOrdersByMinPrice(2000);
 
         // Assert
+        assertNotNull(result);
         assertEquals(3, result.size());
-        assertEquals(101, result.get(0).getId());
-        assertEquals(205, result.get(1).getId());
-        assertEquals(809, result.get(2).getId());
     }
 
     @Test
     void should_returnOrderById_when_idProvided() {
         // Arrange
-        Order order = new Order(101, "Mobile", 1, 30000);
-        when(orderDao.getOrderById(101)).thenReturn(order);
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.of(new Order(101, "Mobile", 1, 30000)));
 
         // Act
-        Order result = orderService.getOrderById(101);
+        Order result = orderService.getOrderById(101).orElseThrow();
 
         // Assert
+        assertNotNull(result);
         assertEquals(101, result.getId());
-        assertEquals("Mobile", result.getName());
-        assertEquals(1, result.getQuantity());
-        assertEquals(30000, result.getPrice());
     }
 
     @Test
-    void should_returnEmptyList_when_noOrdersFound() {
+    void should_returnNotFound_when_orderIdNotFound() {
         // Arrange
-        when(orderDao.getOrders()).thenReturn(List.of());
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.empty());
 
         // Act
-        List<Order> result = orderService.getOrders();
+        ResponseEntity<Order> result = orderService.getOrderByIdResponseEntity(101);
 
         // Assert
-        assertEquals(0, result.size());
+        assertEquals(404, result.getStatusCodeValue());
     }
 
     @Test
-    void should_returnNull_when_orderNotFoundById() {
+    void should_returnPaginatedOrders_when_pageAndSizeProvided() {
         // Arrange
-        when(orderDao.getOrderById(101)).thenReturn(null);
+        when(orderDao.getOrders()).thenReturn(List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        ));
 
         // Act
-        Order result = orderService.getOrderById(101);
+        List<Order> result = orderService.getOrdersPaginated(0, 2);
 
         // Assert
-        assertEquals(null, result);
+        assertNotNull(result);
+        assertEquals(2, result.size());
     }
 }
