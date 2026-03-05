@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class OrderService {
@@ -18,30 +19,24 @@ public class OrderService {
 
     public List<Order> getOrders() {
         return orderDao.getOrders().stream()
-                .sorted(Comparator.comparingLong(Order::getPrice)) // NEW: sort by price
+                .sorted(Comparator.comparingLong(Order::getPrice))
                 .collect(Collectors.toList());
     }
 
-    public Order getOrderById(int id) { // NEW: retrieve order by id
+    // NEW
+    public Order getOrderById(int id) {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getId() == id)
                 .findFirst()
                 .orElse(null);
     }
 
-    public List<Order> getOrdersByMinPrice(long minPrice) { // NEW: filter orders by min price
+    // NEW
+    public List<Order> getOrdersWithFilteringAndPagination(int minPrice, int pageNumber, int pageSize) {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getPrice() >= minPrice)
-                .sorted(Comparator.comparingLong(Order::getPrice))
+                .skip((long) pageNumber * pageSize)
+                .limit(pageSize)
                 .collect(Collectors.toList());
-    }
-
-    public List<Order> getOrdersPaginated(int pageNumber, int pageSize) { // NEW: pagination
-        List<Order> orders = orderDao.getOrders().stream()
-                .sorted(Comparator.comparingLong(Order::getPrice))
-                .collect(Collectors.toList());
-        int start = (pageNumber - 1) * pageSize;
-        int end = Math.min(start + pageSize, orders.size());
-        return orders.subList(start, end);
     }
 }
