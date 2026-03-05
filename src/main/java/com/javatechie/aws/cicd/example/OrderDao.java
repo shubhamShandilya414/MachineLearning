@@ -20,6 +20,7 @@ public class OrderDao {
 
     // NEW
     public Order getOrderById(int id) {
+        // NEW
         return Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
@@ -32,6 +33,7 @@ public class OrderDao {
 
     // NEW
     public List<Order> getOrdersWithFiltering(int minPrice) {
+        // NEW
         return Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
@@ -42,15 +44,18 @@ public class OrderDao {
     }
 
     // NEW
-    public List<Order> getOrdersWithPagination(int pageNumber, int pageSize) {
+    public List<Order> getOrdersWithPagination(int pageSize, int pageNumber) {
+        // NEW
         List<Order> orders = Stream.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
                 .collect(Collectors.toList());
+        // NEW
         int start = (pageNumber - 1) * pageSize;
         int end = Math.min(start + pageSize, orders.size());
+        // NEW
         return orders.subList(start, end); // NEW
     }
 }
