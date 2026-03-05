@@ -9,13 +9,48 @@ import java.util.stream.Stream;
 @Repository
 public class OrderDao {
 
-
     public List<Order> getOrders() {
         return Stream.of(
-                new Order(101, "Mobile", 1, 300000),
+                new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799))
                 .collect(Collectors.toList());
+    }
+
+    // NEW
+    public Order getOrderById(int id) {
+        return Stream.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799))
+                .filter(order -> order.getId() == id)
+                .findFirst()
+                .orElse(null); // NEW
+    }
+
+    // NEW
+    public List<Order> getOrdersWithFiltering(int minPrice) {
+        return Stream.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799))
+                .filter(order -> order.getPrice() >= minPrice)
+                .collect(Collectors.toList()); // NEW
+    }
+
+    // NEW
+    public List<Order> getOrdersWithPagination(int pageNumber, int pageSize) {
+        List<Order> orders = Stream.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799))
+                .collect(Collectors.toList());
+        int start = (pageNumber - 1) * pageSize;
+        int end = Math.min(start + pageSize, orders.size());
+        return orders.subList(start, end); // NEW
     }
 }
