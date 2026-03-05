@@ -21,26 +21,26 @@ public class OrderService {
         return orderDao.getOrders();
     }
 
-    // NEW: method to retrieve an order by ID
-    public Order getOrderById(int id) {
-        return orderDao.getOrders().stream()
-                .filter(order -> order.getId() == id)
-                .findFirst()
-                .orElse(null);
-    }
-
-    // NEW: method to filter orders by minimum price
-    public List<Order> getOrdersByMinPrice(long minPrice) {
+    // NEW: add logic for filtering by minimum price
+    public List<Order> getOrdersByMinPrice(int minPrice) {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getPrice() >= minPrice)
                 .collect(Collectors.toList());
     }
 
-    // NEW: method to paginate orders
-    public List<Order> getOrdersPaginated(int pageNumber, int pageSize) {
-        List<Order> orders = orderDao.getOrders();
-        int start = (pageNumber - 1) * pageSize;
-        int end = Math.min(start + pageSize, orders.size());
-        return orders.subList(start, end);
+    // NEW: add logic for pagination
+    public List<Order> getOrdersPaginated(int pageSize, int pageNumber) {
+        return orderDao.getOrders().stream()
+                .skip((long) pageNumber * pageSize)
+                .limit(pageSize)
+                .collect(Collectors.toList());
+    }
+
+    // NEW: add logic for order lookup by ID
+    public Order getOrderById(int id) {
+        return orderDao.getOrders().stream()
+                .filter(order -> order.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 }
