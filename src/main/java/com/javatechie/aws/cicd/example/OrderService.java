@@ -28,11 +28,11 @@ public class OrderService {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getId() == id)
                 .findFirst()
-                .orElse(null); // NEW
+                .orElse(null);
     }
 
     // NEW
-    public List<Order> getOrdersWithFilteringAndPagination(int minPrice, int pageNumber, int pageSize) {
+    public List<Order> getOrdersWithFiltering(int minPrice, int pageNumber, int pageSize) {
         return orderDao.getOrders().stream()
                 .filter(order -> order.getPrice() >= minPrice)
                 .skip((long) pageNumber * pageSize)
