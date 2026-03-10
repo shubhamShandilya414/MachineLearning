@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,63 +26,102 @@ public class OrderDaoTest {
     private OrderService orderService;
 
     @Test
-    void should_returnAllOrders_when_noFilterProvided() {
+    void shouldReturnOrderById_whenIdProvided() {
         // Arrange
-        List<Order> expectedOrders = List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799)
-        );
-        when(orderDao.getOrders()).thenReturn(expectedOrders);
+        Order order = new Order(101, "Mobile", 1, 30000);
+        when(orderDao.getOrderById(101)).thenReturn(Optional.of(order));
 
         // Act
-        List<Order> actualOrders = orderService.getOrders();
+        Order result = orderService.getOrderById(101).orElseThrow();
 
         // Assert
-        assertEquals(expectedOrders, actualOrders);
+        assertEquals(101, result.getId());
+        assertEquals("Mobile", result.getName());
+        assertEquals(1, result.getQuantity());
+        assertEquals(30000, result.getPrice());
     }
 
     @Test
-    void should_returnFilteredOrders_when_minPriceProvided() {
-        // Arrange
-        List<Order> expectedOrders = List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(205, "Laptop", 1, 150000)
-        );
-        when(orderDao.getOrders()).thenReturn(List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799)
-        ));
-
-        // Act
-        List<Order> actualOrders = orderService.getOrders(10000);
-
-        // Assert
-        assertEquals(expectedOrders, actualOrders);
-    }
-
-    @Test
-    void should_returnOrderById_when_idProvided() {
-        // Arrange
-        Order expectedOrder = new Order(101, "Mobile", 1, 30000);
-        when(orderDao.getOrderById(101)).thenReturn(Optional.of(expectedOrder));
-
-        // Act
-        Order actualOrder = orderService.getOrderById(101).orElseThrow();
-
-        // Assert
-        assertEquals(expectedOrder, actualOrder);
-    }
-
-    @Test
-    void should_throwException_when_orderNotFoundById() {
+    void shouldReturnNotFound_whenIdNotProvided() {
         // Arrange
         when(orderDao.getOrderById(101)).thenReturn(Optional.empty());
 
         // Act and Assert
         assertThrows(RuntimeException.class, () -> orderService.getOrderById(101).orElseThrow());
+    }
+
+    @Test
+    void shouldReturnFilteredOrders_whenMinPriceProvided() {
+        // Arrange
+        List<Order> orders = List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
+
+        // Act
+        List<Order> result = orderService.getOrdersByMinPrice(10000);
+
+        // Assert
+        assertEquals(3, result.size());
+        assertEquals(101, result.get(0).getId());
+        assertEquals(205, result.get(1).getId());
+        assertEquals(809, result.get(2).getId());
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenMinPriceHigherThanAllOrders() {
+        // Arrange
+        List<Order> orders = List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
+
+        // Act
+        List<Order> result = orderService.getOrdersByMinPrice(200000);
+
+        // Assert
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void shouldReturnPaginatedOrders() {
+        // Arrange
+        List<Order> orders = List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
+
+        // Act
+        List<Order> result = orderService.getOrdersPaginated(0, 2);
+
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals(101, result.get(0).getId());
+        assertEquals(58, result.get(1).getId());
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenPaginationParametersInvalid() {
+        // Arrange
+        List<Order> orders = List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
+
+        // Act and Assert
+        assertThrows(RuntimeException.class, () -> orderService.getOrdersPaginated(-1, 2));
+        assertThrows(RuntimeException.class, () -> orderService.getOrdersPaginated(0, -2));
     }
 }
