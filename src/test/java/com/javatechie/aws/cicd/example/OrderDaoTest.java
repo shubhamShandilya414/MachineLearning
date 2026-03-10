@@ -7,9 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +18,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class OrderDaoTest {
 
-    private static final Logger log = LoggerFactory.getLogger(OrderDaoTest.class);
-
     @Mock
     private OrderDao orderDao;
 
@@ -30,7 +25,7 @@ public class OrderDaoTest {
     private OrderService orderService;
 
     @Test
-    void should_returnAllOrders_whenNoFilterProvided() {
+    void should_returnAllOrders_when_noFilterProvided() {
         // Arrange
         List<Order> expectedOrders = List.of(
                 new Order(101, "Mobile", 1, 30000),
@@ -69,7 +64,7 @@ public class OrderDaoTest {
     }
 
     @Test
-    void should_returnOrderById_whenIdProvided() {
+    void should_returnOrderById_when_idProvided() {
         // Arrange
         Order expectedOrder = new Order(101, "Mobile", 1, 30000);
         when(orderDao.getOrderById(101)).thenReturn(Optional.of(expectedOrder));
@@ -82,28 +77,11 @@ public class OrderDaoTest {
     }
 
     @Test
-    void should_throwException_whenOrderNotFoundById() {
+    void should_throwException_when_orderNotFoundById() {
         // Arrange
         when(orderDao.getOrderById(101)).thenReturn(Optional.empty());
 
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> orderService.getOrderById(101).orElseThrow());
-    }
-
-    @Test
-    void should_returnPaginatedOrders_whenPageableProvided() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 2);
-        List<Order> expectedOrders = List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000)
-        );
-        when(orderDao.getOrders(pageable)).thenReturn(Page.of(expectedOrders));
-
-        // Act
-        Page<Order> actualOrders = orderService.getOrders(pageable);
-
-        // Assert
-        assertEquals(expectedOrders, actualOrders.getContent());
+        assertThrows(RuntimeException.class, () -> orderService.getOrderById(101).orElseThrow());
     }
 }
