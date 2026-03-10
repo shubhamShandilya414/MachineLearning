@@ -41,17 +41,29 @@ public class OrderService {
     }
 
     // NEW: Added method to retrieve orders with filtering and pagination
-    public ResponseEntity<List<Order>> getOrders(int minPrice, int page, int size) {
-        log.info("getOrders called with minPrice={}, page={}, size={}", minPrice, page, size);
+    public ResponseEntity<List<Order>> getOrders(int pageNumber, int pageSize, long minPrice) {
+        log.info("getOrders called with pageNumber={}, pageSize={}, minPrice={}", pageNumber, pageSize, minPrice);
         try {
             List<Order> orders = orderDao.getOrders().stream()
                     .filter(o -> o.getPrice() >= minPrice)
-                    .skip((long) page * size)
-                    .limit(size)
+                    .skip((long) pageNumber * pageSize)
+                    .limit(pageSize)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
             log.error("Failed to retrieve orders", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // NEW: Added method to retrieve all orders
+    public ResponseEntity<List<Order>> getAllOrders() {
+        log.info("getAllOrders called");
+        try {
+            List<Order> orders = orderDao.getOrders();
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            log.error("Failed to retrieve all orders", e);
             return ResponseEntity.badRequest().build();
         }
     }
