@@ -2,8 +2,6 @@ package com.javatechie.aws.cicd.example;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/orders")
@@ -30,13 +27,11 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> getOrders() {
         log.info("getOrders called");
-        List<Order> orders = orderDao.getOrders().stream()
-                .sorted(Comparator.comparingLong(Order::getPrice))
-                .collect(Collectors.toList());
+        List<Order> orders = orderDao.getOrders();
+        orders.sort(Comparator.comparingLong(Order::getPrice));
         return ResponseEntity.ok(orders);
     }
 
-    // NEW: endpoint for order retrieval by ID
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable int id) {
         log.info("getOrderById called with id={}", id);
@@ -51,4 +46,7 @@ public class OrderController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    // NEW: endpoint for retrieving order by ID
+    // NEW: added logging and error handling
 }
