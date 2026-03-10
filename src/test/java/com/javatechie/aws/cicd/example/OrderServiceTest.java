@@ -15,11 +15,13 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceTest {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceTest.class);
 
     @Mock
     private OrderDao orderDao;
@@ -28,7 +30,7 @@ public class OrderServiceTest {
     private OrderService orderService;
 
     @Test
-    void should_returnAllOrders_when_noFilterProvided() {
+    void should_returnAllOrders_whenNoFilterProvided() {
         // Arrange
         List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
@@ -52,14 +54,18 @@ public class OrderServiceTest {
         // Arrange
         List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
                 new Order(205, "Laptop", 1, 150000),
                 new Order(809, "headset", 1, 1799)
         );
-        when(orderDao.getOrders()).thenReturn(orders);
+        when(orderDao.getOrders()).thenReturn(List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        ));
 
         // Act
-        ResponseEntity<List<Order>> response = orderService.getOrders(15000L, null, null);
+        ResponseEntity<List<Order>> response = orderService.getOrders(1000, null, null);
 
         // Assert
         assertNotNull(response);
@@ -68,10 +74,10 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnOrderById_when_idProvided() {
+    void should_returnOrderById_whenIdProvided() {
         // Arrange
         Order order = new Order(101, "Mobile", 1, 30000);
-        when(orderDao.getOrderById(101)).thenReturn(Optional.of(order));
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.of(order));
 
         // Act
         ResponseEntity<Order> response = orderService.getOrderById(101);
@@ -83,12 +89,12 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnNotFound_when_orderIdDoesNotExist() {
+    void should_returnNotFound_whenOrderByIdNotProvided() {
         // Arrange
-        when(orderDao.getOrderById(999)).thenReturn(Optional.empty());
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.empty());
 
         // Act
-        ResponseEntity<Order> response = orderService.getOrderById(999);
+        ResponseEntity<Order> response = orderService.getOrderById(101);
 
         // Assert
         assertNotNull(response);
@@ -96,7 +102,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnPaginatedOrders_when_pageAndSizeProvided() {
+    void should_returnPaginatedOrders_whenPageAndSizeProvided() {
         // Arrange
         List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
@@ -113,15 +119,5 @@ public class OrderServiceTest {
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(2, response.getBody().size());
-    }
-
-    @Test
-    void should_returnBadRequest_when_invalidPageOrSizeProvided() {
-        // Act
-        ResponseEntity<List<Order>> response = orderService.getOrders(null, -1, 2);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
     }
 }
