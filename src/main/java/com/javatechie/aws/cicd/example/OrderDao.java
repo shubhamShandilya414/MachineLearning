@@ -21,7 +21,7 @@ public class OrderDao {
                 .collect(Collectors.toList());
     }
 
-    // NEW method for retrieving order by ID
+    // NEW method to retrieve order by ID
     public Optional<Order> getOrderById(int id) {
         log.info("getOrderById called with id={}", id);
         try {
