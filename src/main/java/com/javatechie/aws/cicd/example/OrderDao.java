@@ -21,7 +21,7 @@ public class OrderDao {
                 .collect(Collectors.toList());
     }
 
-    // NEW method to retrieve order by ID
+    // NEW: method to retrieve an order by ID
     public Optional<Order> getOrderById(int id) {
         log.info("getOrderById called with id={}", id);
         try {
@@ -31,6 +31,37 @@ public class OrderDao {
         } catch (Exception e) {
             log.error("Failed to retrieve order id={}", id, e);
             return Optional.empty();
+        }
+    }
+
+    // NEW: method to filter orders by minimum price
+    public List<Order> getOrdersByMinPrice(int minPrice) {
+        log.info("getOrdersByMinPrice called with minPrice={}", minPrice);
+        try {
+            return getOrders().stream()
+                    .filter(order -> order.getPrice() >= minPrice)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to retrieve orders with minPrice={}", minPrice, e);
+            return List.of();
+        }
+    }
+
+    // NEW: method to paginate orders
+    public List<Order> getOrdersPaginated(int pageNumber, int pageSize) {
+        log.info("getOrdersPaginated called with pageNumber={} and pageSize={}", pageNumber, pageSize);
+        try {
+            if (pageNumber < 0 || pageSize < 1) {
+                log.error("Invalid pagination parameters");
+                return List.of();
+            }
+            return getOrders().stream()
+                    .skip((long) pageNumber * pageSize)
+                    .limit(pageSize)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to retrieve paginated orders", e);
+            return List.of();
         }
     }
 }
