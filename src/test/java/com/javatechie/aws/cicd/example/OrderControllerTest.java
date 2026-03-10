@@ -1,8 +1,8 @@
 package com.javatechie.aws.cicd.example;
 
 import com.javatechie.aws.cicd.example.Order;
-import com.javatechie.aws.cicd.example.OrderController;
 import com.javatechie.aws.cicd.example.OrderDao;
+import com.javatechie.aws.cicd.example.OrderController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,63 +29,68 @@ public class OrderControllerTest {
     private OrderController orderController;
 
     @Test
-    void should_returnFilteredOrders_when_minPriceProvided() {
-        // Arrange
-        when(orderDao.getOrders()).thenReturn(List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799)
-        ));
-
-        // Act
-        ResponseEntity<List<Order>> response = orderController.getOrders(2000);
-
-        // Assert
-        assertEquals(3, response.getBody().size());
-    }
-
-    @Test
     void should_returnOrderById_when_idProvided() {
         // Arrange
-        when(orderDao.getOrderById(101)).thenReturn(Optional.of(new Order(101, "Mobile", 1, 30000)));
+        Order order = new Order(101, "Mobile", 1, 30000);
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.of(order));
 
         // Act
         ResponseEntity<Order> response = orderController.getOrderById(101);
 
         // Assert
-        assertEquals(101, response.getBody().getId());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(order, response.getBody());
     }
 
     @Test
-    void should_return404_when_orderNotFoundById() {
+    void should_returnNotFound_when_idNotProvided() {
         // Arrange
-        when(orderDao.getOrderById(999)).thenReturn(Optional.empty());
+        when(orderDao.getOrderById(anyInt())).thenReturn(Optional.empty());
 
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> orderController.getOrderById(999));
+        ResponseEntity<Order> response = orderController.getOrderById(101);
+        assertEquals(404, response.getStatusCodeValue());
     }
 
     @Test
-    void should_returnPaginatedOrders_when_pageAndSizeProvided() {
+    void should_returnFilteredOrders_when_minPriceProvided() {
         // Arrange
-        when(orderDao.getOrders()).thenReturn(List.of(
+        List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799)
-        ));
+                new Order(205, "Laptop", 1, 150000)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
 
         // Act
-        ResponseEntity<List<Order>> response = orderController.getOrders(0, 2);
+        ResponseEntity<List<Order>> response = orderController.getOrders(2000);
 
         // Assert
-        assertEquals(2, response.getBody().size());
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(3, response.getBody().size());
     }
 
     @Test
-    void should_returnBadRequest_when_invalidPaginationParameters() {
+    void should_returnAllOrders_when_noMinPriceProvided() {
+        // Arrange
+        List<Order> orders = List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000)
+        );
+        when(orderDao.getOrders()).thenReturn(orders);
+
+        // Act
+        ResponseEntity<List<Order>> response = orderController.getOrders(null);
+
+        // Assert
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(3, response.getBody().size());
+    }
+
+    @Test
+    void should_throwException_when_minPriceIsNegative() {
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> orderController.getOrders(-1, 2));
+        assertThrows(ResponseStatusException.class, () -> orderController.getOrders(-1));
     }
 }
