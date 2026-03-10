@@ -30,7 +30,7 @@ public class OrderServiceTest {
     private OrderService orderService;
 
     @Test
-    void should_returnAllOrders_whenNoFilterProvided() {
+    void should_returnAllOrders_when_noFilterProvided() {
         // Arrange
         List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
@@ -74,7 +74,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnOrderById_whenIdProvided() {
+    void should_returnOrderById_when_idProvided() {
         // Arrange
         Order order = new Order(101, "Mobile", 1, 30000);
         when(orderDao.getOrderById(101)).thenReturn(Optional.of(order));
@@ -89,7 +89,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnNotFound_whenOrderByIdNotProvided() {
+    void should_returnNotFound_when_orderIdNotExists() {
         // Arrange
         when(orderDao.getOrderById(101)).thenReturn(Optional.empty());
 
@@ -102,7 +102,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void should_returnPaginatedOrders_whenPageAndSizeProvided() {
+    void should_returnPaginatedOrders_when_paginationParamsProvided() {
         // Arrange
         List<Order> orders = List.of(
                 new Order(101, "Mobile", 1, 30000),
@@ -113,7 +113,7 @@ public class OrderServiceTest {
         when(orderDao.getOrders()).thenReturn(orders);
 
         // Act
-        ResponseEntity<List<Order>> response = orderService.getOrders(null, 0, 2);
+        ResponseEntity<List<Order>> response = orderService.getOrders(null, 2, 2);
 
         // Assert
         assertNotNull(response);
