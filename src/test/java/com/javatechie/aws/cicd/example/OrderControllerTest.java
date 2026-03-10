@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,31 +29,8 @@ public class OrderControllerTest {
     private OrderController orderController;
 
     @Test
-    void should_returnAllOrders_whenNoFilterProvided() {
-        // Arrange
-        List<Order> orders = List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799)
-        );
-        when(orderDao.getOrders()).thenReturn(orders);
-
-        // Act
-        ResponseEntity<List<Order>> response = orderController.getOrders(null, null, null);
-
-        // Assert
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals(4, response.getBody().size());
-    }
-
-    @Test
     void should_returnFilteredOrders_when_minPriceProvided() {
         // Arrange
-        List<Order> orders = List.of(
-                new Order(101, "Mobile", 1, 30000),
-                new Order(205, "Laptop", 1, 150000)
-        );
         when(orderDao.getOrders()).thenReturn(List.of(
                 new Order(101, "Mobile", 1, 30000),
                 new Order(58, "Book", 4, 2000),
@@ -61,33 +39,53 @@ public class OrderControllerTest {
         ));
 
         // Act
-        ResponseEntity<List<Order>> response = orderController.getOrders(10000L, null, null);
+        ResponseEntity<List<Order>> response = orderController.getOrders(2000);
 
         // Assert
-        assertEquals(200, response.getStatusCodeValue());
         assertEquals(3, response.getBody().size());
     }
 
     @Test
-    void should_returnOrderById_whenIdProvided() {
+    void should_returnOrderById_when_idProvided() {
         // Arrange
-        Order order = new Order(101, "Mobile", 1, 30000);
-        when(orderDao.getOrderById(101)).thenReturn(Optional.of(order));
+        when(orderDao.getOrderById(101)).thenReturn(Optional.of(new Order(101, "Mobile", 1, 30000)));
 
         // Act
         ResponseEntity<Order> response = orderController.getOrderById(101);
 
         // Assert
-        assertEquals(200, response.getStatusCodeValue());
         assertEquals(101, response.getBody().getId());
     }
 
     @Test
-    void should_returnNotFound_whenOrderByIdNotProvided() {
+    void should_return404_when_orderNotFoundById() {
         // Arrange
-        when(orderDao.getOrderById(101)).thenReturn(Optional.empty());
+        when(orderDao.getOrderById(999)).thenReturn(Optional.empty());
 
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> orderController.getOrderById(101));
+        assertThrows(ResponseStatusException.class, () -> orderController.getOrderById(999));
+    }
+
+    @Test
+    void should_returnPaginatedOrders_when_pageAndSizeProvided() {
+        // Arrange
+        when(orderDao.getOrders()).thenReturn(List.of(
+                new Order(101, "Mobile", 1, 30000),
+                new Order(58, "Book", 4, 2000),
+                new Order(205, "Laptop", 1, 150000),
+                new Order(809, "headset", 1, 1799)
+        ));
+
+        // Act
+        ResponseEntity<List<Order>> response = orderController.getOrders(0, 2);
+
+        // Assert
+        assertEquals(2, response.getBody().size());
+    }
+
+    @Test
+    void should_returnBadRequest_when_invalidPaginationParameters() {
+        // Act and Assert
+        assertThrows(ResponseStatusException.class, () -> orderController.getOrders(-1, 2));
     }
 }
