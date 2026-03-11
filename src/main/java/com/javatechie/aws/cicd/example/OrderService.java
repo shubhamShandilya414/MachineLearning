@@ -6,14 +6,18 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@Service
+@RestController
+@RequestMapping("/orders")
 public class OrderService {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OrderService.class);
@@ -25,8 +29,35 @@ public class OrderService {
         this.orderDao = orderDao;
     }
 
-    // NEW: Added method to retrieve an order by ID
-    public ResponseEntity<Order> getOrderById(int id) {
+    @GetMapping
+    public ResponseEntity<List<Order>> getOrders(@RequestParam(required = false) Integer minPrice,
+                                                 @RequestParam(required = false, defaultValue = "0") int page,
+                                                 @RequestParam(required = false, defaultValue = "10") int size) {
+        log.info("getOrders called with minPrice={}, page={}, size={}", minPrice, page, size);
+        try {
+            List<Order> orders = orderDao.getOrders();
+            if (minPrice != null) {
+                orders = orders.stream()
+                        .filter(order -> order.getPrice() >= minPrice)
+                        .collect(Collectors.toList());
+            }
+            // NEW: pagination
+            int start = page * size;
+            int end = start + size;
+            orders = orders.stream()
+                    .skip(start)
+                    .limit(size)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            log.error("Failed to retrieve orders", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // NEW: endpoint for retrieving order by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable int id) {
         log.info("getOrderById called with id={}", id);
         try {
             Optional<Order> order = orderDao.getOrders().stream()
@@ -36,34 +67,6 @@ public class OrderService {
                     .orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
             log.error("Failed to retrieve order id={}", id, e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    // NEW: Added method to retrieve orders with filtering and pagination
-    public ResponseEntity<List<Order>> getOrders(int pageNumber, int pageSize, long minPrice) {
-        log.info("getOrders called with pageNumber={}, pageSize={}, minPrice={}", pageNumber, pageSize, minPrice);
-        try {
-            List<Order> orders = orderDao.getOrders().stream()
-                    .filter(o -> o.getPrice() >= minPrice)
-                    .skip((long) pageNumber * pageSize)
-                    .limit(pageSize)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            log.error("Failed to retrieve orders", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    // NEW: Added method to retrieve all orders
-    public ResponseEntity<List<Order>> getAllOrders() {
-        log.info("getAllOrders called");
-        try {
-            List<Order> orders = orderDao.getOrders();
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            log.error("Failed to retrieve all orders", e);
             return ResponseEntity.badRequest().build();
         }
     }
