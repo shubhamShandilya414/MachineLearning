@@ -1,18 +1,32 @@
-package com.javatechie.aws.cicd.example;
+package com.javatechie.aws/cicd/example;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
 public class Order {
 
     private int id;
     private String name;
     private int quantity;
     private long price;
+
+    public Order(int id, String name, int quantity, long price) {
+        this.id = id;
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public long getPrice() {
+        return price;
+    }
 }
