@@ -16,6 +16,7 @@ public class OrderController {
 
     @GetMapping("/orders/{id}")
     public Order getOrderById(@PathVariable int id) {
+        // NEW
         return orderDao.getOrderById(id);
     }
 
@@ -23,6 +24,7 @@ public class OrderController {
     public List<Order> getOrders(@RequestParam(required = false) Double minPrice,
                                   @RequestParam(required = false, defaultValue = "0") int page,
                                   @RequestParam(required = false, defaultValue = "10") int size) {
+        // NEW
         if (minPrice != null) {
             return orderDao.getOrdersByMinPrice(minPrice, page, size);
         } else {
