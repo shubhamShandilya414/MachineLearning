@@ -1,21 +1,37 @@
-package com.javatechie.aws.cicd.example;
+package com.javatechie.aws/cicd/example;
 
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Repository
 public class OrderDao {
 
+    // existing code...
 
-    public List<Order> getOrders() {
-        return Stream.of(
-                new Order(101, "Mobile", 1, 300000),
-                new Order(58, "Book", 4, 2000),
-                new Order(205, "Laptop", 1, 150000),
-                new Order(809, "headset", 1, 1799))
+    public Order getOrderById(int id) {
+        // NEW
+        return orders.stream()
+                .filter(order -> order.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Order> getOrdersByMinPrice(double minPrice) {
+        // NEW
+        return orders.stream()
+                .filter(order -> order.getPrice() >= minPrice)
+                .sorted(Comparator.comparing(Order::getPrice))
+                .collect(Collectors.toList());
+    }
+
+    public List<Order> getOrdersPaginated(int page, int size) {
+        // NEW
+        return orders.stream()
+                .sorted(Comparator.comparing(Order::getPrice))
+                .skip(page * size)
+                .limit(size)
                 .collect(Collectors.toList());
     }
 }
