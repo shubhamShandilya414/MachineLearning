@@ -1,9 +1,6 @@
 package com.javatechie.aws.cicd.example;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,28 +13,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OrderController.class);
-
     private final OrderDao orderDao;
-
-    @Autowired
-    public OrderController(OrderDao orderDao) {
-        this.orderDao = orderDao;
-    }
 
     @GetMapping
     public ResponseEntity<List<Order>> getOrders(@RequestParam(required = false) Integer minPrice,
-                                                  @RequestParam(required = false, defaultValue = "0") int page,
-                                                  @RequestParam(required = false, defaultValue = "10") int size) {
+                                                 @RequestParam(required = false, defaultValue = "0") int page,
+                                                 @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("getOrders called with minPrice={}, page={}, size={}", minPrice, page, size);
-
         try {
             List<Order> orders = orderDao.getOrders();
             if (minPrice != null) {
@@ -52,7 +42,6 @@ public class OrderController {
                     .skip(start)
                     .limit(size)
                     .collect(Collectors.toList());
-
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
             log.error("Failed to retrieve orders", e);
@@ -63,7 +52,6 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable int id) {
         log.info("getOrderById called with id={}", id);
-
         try {
             Optional<Order> order = orderDao.getOrders().stream()
                     .filter(o -> o.getId() == id)
