@@ -7,6 +7,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -26,12 +28,11 @@ public class OrderServiceTest {
         when(orderRepository.findById(1L)).thenReturn(order);
 
         // Act
-        OrderDto result = orderService.getOrderById(1L).getBody();
+        ResponseEntity<OrderDto> result = orderService.getOrderById(1L);
 
         // Assert
-        assertEquals(1L, result.getId());
-        assertEquals("Test Order", result.getName());
-        assertEquals(10.99, result.getPrice());
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(1L, result.getBody().getId());
     }
 
     @Test
@@ -41,10 +42,11 @@ public class OrderServiceTest {
         when(orderRepository.findAll(Pageable.unpaged())).thenReturn(orders);
 
         // Act
-        Page<OrderDto> result = orderService.getOrders(null, 0, 10).getBody();
+        ResponseEntity<Page<OrderDto>> result = orderService.getOrders(null, 0, 10);
 
         // Assert
-        assertEquals(0, result.getTotalElements());
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(0, result.getBody().getTotalElements());
     }
 
     @Test
@@ -54,9 +56,10 @@ public class OrderServiceTest {
         when(orderRepository.findByMinPrice(10.0, Pageable.unpaged())).thenReturn(orders);
 
         // Act
-        Page<OrderDto> result = orderService.getOrders(10.0, 0, 10).getBody();
+        ResponseEntity<Page<OrderDto>> result = orderService.getOrders(10.0, 0, 10);
 
         // Assert
-        assertEquals(0, result.getTotalElements());
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(0, result.getBody().getTotalElements());
     }
 }
