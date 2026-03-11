@@ -1,14 +1,11 @@
-package com.javatechie.aws/cicd/example;
-
-import org.springframework.stereotype.Repository;
+package com.javatechie.aws.cicd.example;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Repository
 public class OrderDao {
 
-    // existing code...
+    // ... existing code ...
 
     public Order getOrderById(int id) {
         // NEW
@@ -22,14 +19,14 @@ public class OrderDao {
         // NEW
         return orders.stream()
                 .filter(order -> order.getPrice() >= minPrice)
-                .sorted(Comparator.comparingDouble(Order::getPrice))
+                .sorted(Comparator.comparing(Order::getPrice))
                 .collect(Collectors.toList());
     }
 
     public List<Order> getOrdersPaginated(int page, int size) {
         // NEW
         return orders.stream()
-                .sorted(Comparator.comparingDouble(Order::getPrice))
+                .sorted(Comparator.comparing(Order::getPrice))
                 .skip(page * size)
                 .limit(size)
                 .collect(Collectors.toList());
