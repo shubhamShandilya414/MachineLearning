@@ -1,46 +1,38 @@
 import com.javatechie.aws.cicd.example.OrderService;
-import com.javatechie.aws.cicd.example.OrderRepository;
 import com.javatechie.aws.cicd.example.dto.OrderDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.ResponseEntity;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
 
-    @MockBean
-    private OrderRepository orderRepository;
-
-    @Before
-    public void setup() {
-        OrderDto orderDto = new OrderDto(1L, "Test Order", 10.99);
-        when(orderRepository.findById(1L)).thenReturn(orderDto);
+    @BeforeEach
+    void setup() {
+        // setup test data
     }
 
     @Test
-    public void testGetOrderById() {
+    void testGetOrderById() {
+        // test happy path
         ResponseEntity<OrderDto> response = orderService.getOrderById(1L);
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
     }
 
     @Test
-    public void testGetOrders() {
-        Pageable pageable = PageRequest.of(0, 10);
+    void testGetOrders() {
+        // test happy path
         ResponseEntity<Page<OrderDto>> response = orderService.getOrders(null, 0, 10);
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
     }
 }
