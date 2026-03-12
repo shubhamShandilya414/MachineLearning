@@ -1,5 +1,3 @@
-// NEW
-import com.javatechie.aws.cicd.example.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,12 +14,16 @@ public class OrderServiceApplication {
     private OrderService orderService;
 
     @GetMapping
-    public ResponseEntity<Page<OrderDto>> fetchOrders(
+    public ResponseEntity<Page<OrderDto>> getOrders(
             @RequestParam(required = false) Double minPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        // NEW
         return orderService.getOrders(minPrice, page, size);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id);
     }
 
     public static void main(String[] args) {
