@@ -1,4 +1,3 @@
-// NEW
 public class OrderFilter {
 
     private Double minPrice;
@@ -9,5 +8,9 @@ public class OrderFilter {
 
     public Double getMinPrice() {
         return minPrice;
+    }
+
+    public void setMinPrice(Double minPrice) {
+        this.minPrice = minPrice;
     }
 }
