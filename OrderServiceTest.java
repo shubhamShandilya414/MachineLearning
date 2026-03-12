@@ -1,49 +1,58 @@
 // NEW
+import com.javatechie.aws.cicd.example.OrderService;
 import com.javatechie.aws.cicd.example.dto.OrderDto;
-import com.javatechie.aws.cicd.example.dto.OrderFilter;
 import com.javatechie.aws.cicd.example.repository.OrderRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 // NEW
+@RunWith(SpringRunner.class)
 @SpringBootTest
 public class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
 
-    @Autowired
+    @MockBean
     private OrderRepository orderRepository;
 
-    @BeforeEach
-    void setup() {
-        // Initialize test data
+    @Before
+    public void setup() {
+        // setup test data
     }
 
     @Test
-    void testGetOrderById() {
-        // Test getting an order by ID
-        Long orderId = 1L;
-        ResponseEntity<OrderDto> response = orderService.getOrderById(orderId);
+    public void testGetOrderById() {
+        // test getOrderById method
+        Long id = 1L;
+        OrderDto orderDto = new OrderDto();
+        when(orderRepository.findById(id)).thenReturn(orderDto);
+        ResponseEntity<OrderDto> response = orderService.getOrderById(id);
         assertEquals(200, response.getStatusCodeValue());
         assertNotNull(response.getBody());
     }
 
     @Test
-    void testGetOrders() {
-        // Test getting orders with filtering and pagination
+    public void testGetOrders() {
+        // test getOrders method
         Double minPrice = 10.0;
         int page = 0;
         int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDto> orders = orderRepository.findByFilter(new OrderFilter(minPrice), pageable);
+        when(orderRepository.findByFilter(new OrderFilter(minPrice), pageable)).thenReturn(orders);
         ResponseEntity<Page<OrderDto>> response = orderService.getOrders(minPrice, page, size);
         assertEquals(200, response.getStatusCodeValue());
         assertNotNull(response.getBody());
