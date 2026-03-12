@@ -1,17 +1,13 @@
 // NEW
-import com.javatechie.aws.cicd.example.dto.OrderDto;
-import com.javatechie.aws.cicd.example.dto.OrderFilter;
-import com.javatechie.aws.cicd.example.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 public class OrderService {
@@ -26,9 +22,8 @@ public class OrderService {
     // NEW
     @GetMapping("/orders/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
-        return orderRepository.findById(id)
-                .map(OrderDto::fromEntity)
-                .map(ResponseEntity::ok)
+        Optional<Order> order = orderRepository.findById(id);
+        return order.map(OrderDto::from).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -40,6 +35,7 @@ public class OrderService {
             @RequestParam(defaultValue = "10") int size) {
         OrderFilter orderFilter = new OrderFilter(minPrice);
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(orderRepository.findByFilter(orderFilter, pageable).map(OrderDto::fromEntity));
+        Page<Order> orders = orderRepository.findByFilter(orderFilter, pageable);
+        return ResponseEntity.ok(orders.map(OrderDto::from));
     }
 }
