@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * Order Service API implementation.
  * Provides endpoints for retrieving orders with filtering, pagination, and order lookup by ID.
@@ -37,8 +35,8 @@ public class OrderService {
      */
     @GetMapping("/orders/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
+        // NEW
         return orderRepository.findById(id)
-                .map(OrderDto::new)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -56,8 +54,9 @@ public class OrderService {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        // NEW
         OrderFilter orderFilter = new OrderFilter(minPrice);
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(orderRepository.findByFilter(orderFilter, pageable).map(OrderDto::new));
+        return ResponseEntity.ok(orderRepository.findByFilter(orderFilter, pageable));
     }
 }
