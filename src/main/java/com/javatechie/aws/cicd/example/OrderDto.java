@@ -1,5 +1,4 @@
 // NEW
-import com.javatechie.aws/cicd/example.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ public class OrderDto {
     private String name;
     private Long price;
 
-    public static OrderDto fromEntity(Order order) {
+    public static OrderDto from(Order order) {
         return new OrderDto(order.getId(), order.getName(), order.getPrice());
     }
 }
