@@ -14,5 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByFilter(@Param("minPrice") Double minPrice, Pageable pageable);
 
     // NEW
-    Order findById(Long id);
+    @Query("SELECT o FROM Order o WHERE o.id = :id")
+    Order findById(@Param("id") Long id);
 }
